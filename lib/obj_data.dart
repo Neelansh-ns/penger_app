@@ -15,8 +15,18 @@ class Vertex {
     return Vertex(x * c - z * s, y, x * s + z * c);
   }
 
+  // Rotate around X-axis
+  Vertex rotateX(double angle) {
+    final c = cos(angle);
+    final s = sin(angle);
+    return Vertex(x, y * c - z * s, y * s + z * c);
+  }
+
   /// Translate along Z-axis
   Vertex translateZ(double dz) => Vertex(x, y, z + dz);
+
+  // Perspective projection
+  (double, double) project() => (x / z, y / z);
 }
 
 /// A face is a list of vertex indices (typically 3 for triangles)
