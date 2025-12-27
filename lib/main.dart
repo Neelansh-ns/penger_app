@@ -32,7 +32,7 @@ class _WireframeViewerState extends State<WireframeViewer>
   // View controls
   double angleY = 0; // Rotation around Y axis
   double angleX = 0; // Rotation around X axis (tilt)
-  double zoom = 3.0; // Distance from camera
+  double zoom = 15.0; // Distance from camera
   double speed = 1.0; // Rotation speed multiplier
   bool isPlaying = true; // Auto-rotate toggle
   bool showWireframe = true;
@@ -86,8 +86,8 @@ class _WireframeViewerState extends State<WireframeViewer>
 
   void _handleScroll(PointerScrollEvent event) {
     setState(() {
-      zoom += event.scrollDelta.dy * 0.005;
-      zoom = zoom.clamp(1.0, 10.0);
+      zoom += event.scrollDelta.dy * 0.05; // Scroll up = zoom in
+      zoom = zoom.clamp(1.0, 20.0);
     });
   }
 
@@ -131,7 +131,7 @@ class _WireframeViewerState extends State<WireframeViewer>
                       onPressed: () => setState(() {
                         angleY = 0;
                         angleX = 0;
-                        zoom = 3.0;
+                        zoom = 15.0;
                         speed = 1.0;
                       }),
                       icon: const Icon(
@@ -153,7 +153,7 @@ class _WireframeViewerState extends State<WireframeViewer>
                         label: 'Zoom',
                         value: zoom,
                         min: 1.0,
-                        max: 10.0,
+                        max: 20.0,
                         onChanged: (v) => setState(() => zoom = v),
                       ),
                     ),
@@ -196,7 +196,9 @@ class _WireframeViewerState extends State<WireframeViewer>
                         fs: fs,
                         angleY: angleY,
                         angleX: angleX,
-                        dz: zoom,
+                        dz:
+                            20.0 /
+                            zoom, // Inverse: higher zoom = smaller dz = closer
                       ),
                     ),
                   ),
