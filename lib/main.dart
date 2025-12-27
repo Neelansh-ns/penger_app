@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'obj_data.dart';
 
 void main() => runApp(const WireframeApp());
 
@@ -9,6 +10,7 @@ class WireframeApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         backgroundColor: Color(0xFF101010),
         body: Center(child: WireframeWidget()),
@@ -30,24 +32,9 @@ class _WireframeWidgetState extends State<WireframeWidget> with SingleTickerProv
   final double dz = 1;
   static const int fps = 60;
 
-  // Cube vertices
-  final List<Point3D> vs = [
-    Point3D(-0.5, -0.5, -0.5),
-    Point3D(0.5, -0.5, -0.5),
-    Point3D(0.5, 0.5, -0.5),
-    Point3D(-0.5, 0.5, -0.5),
-    Point3D(-0.5, -0.5, 0.5),
-    Point3D(0.5, -0.5, 0.5),
-    Point3D(0.5, 0.5, 0.5),
-    Point3D(-0.5, 0.5, 0.5),
-  ];
-
-  // Cube faces (indices into vertices)
-  final List<List<int>> fs = [
-    [0, 1, 2, 3], [4, 5, 6, 7], // front, back
-    [0, 1, 5, 4], [2, 3, 7, 6], // bottom, top
-    [0, 3, 7, 4], [1, 2, 6, 5], // left, right
-  ];
+  // Cube vertices and faces (indices into vertices)
+  final List<Vertex> vs = Obj3D.cube.vertices;
+  final List<Face> fs = Obj3D.cube.faces;
 
   @override
   void initState() {
@@ -79,27 +66,9 @@ class _WireframeWidgetState extends State<WireframeWidget> with SingleTickerProv
   }
 }
 
-class Point3D {
-  final double x, y, z;
-  const Point3D(this.x, this.y, this.z);
-
-  // Rotate around Y-axis (in XZ plane)
-  Point3D rotateXZ(double angle) {
-    final c = cos(angle);
-    final s = sin(angle);
-    return Point3D(x * c - z * s, y, x * s + z * c);
-  }
-
-  // Translate along Z-axis
-  Point3D translateZ(double dz) => Point3D(x, y, z + dz);
-
-  // Perspective projection (3D → 2D)
-  Offset project() => Offset(x / z, y / z);
-}
-
 class WireframePainter extends CustomPainter {
-  final List<Point3D> vs;
-  final List<List<int>> fs;
+  final List<Vertex> vs;
+  final List<Face> fs;
   final double angle;
   final double dz;
 
@@ -112,16 +81,20 @@ class WireframePainter extends CustomPainter {
     return Offset((p.dx + 1) / 2 * size.width, (1 - (p.dy + 1) / 2) * size.height);
   }
 
-  // Transform a 3D point to screen coordinates
-  Offset transform(Point3D v, Size size) {
-    return screen(v.rotateXZ(angle).translateZ(dz).project(), size);
+  // Perspective projection (3D → 2D)
+  Offset project(Vertex v) => Offset(v.x / v.z, v.y / v.z);
+
+  // Transform a 3D vertex to screen coordinates
+  Offset transform(Vertex v, Size size) {
+    return screen(project(v.rotateY(angle).translateZ(dz)), size);
   }
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = foreground
-      ..strokeWidth = 3
+      ..strokeWidth =
+          1.0 // Thinner lines for detailed model
       ..style = PaintingStyle.stroke;
 
     // Draw each face as a series of lines
