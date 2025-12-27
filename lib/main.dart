@@ -32,9 +32,9 @@ class _WireframeWidgetState extends State<WireframeWidget> with SingleTickerProv
   final double dz = 1;
   static const int fps = 60;
 
-  // Cube vertices and faces (indices into vertices)
-  final List<Vertex> vs = Obj3D.cube.vertices;
-  final List<Face> fs = Obj3D.cube.faces;
+  // Penger vertices and faces (indices into vertices)
+  final List<Vertex> vs = Obj3D.penger.vertices;
+  final List<Face> fs = Obj3D.penger.faces;
 
   @override
   void initState() {
@@ -86,7 +86,8 @@ class WireframePainter extends CustomPainter {
 
   // Transform a 3D vertex to screen coordinates
   Offset transform(Vertex v, Size size) {
-    return screen(project(v.rotateY(angle).translateZ(dz)), size);
+    final centered = Vertex(v.x, v.y - 0.5, v.z);
+    return screen(project(centered.rotateY(angle).translateZ(dz)), size);
   }
 
   @override
